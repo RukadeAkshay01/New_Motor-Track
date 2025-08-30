@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useEffect } from 'react';
 import { 
   LayoutDashboard, 
   Building2, 
@@ -26,6 +27,7 @@ import DatabaseStatus from './components/DatabaseStatus';
 import CreateCompanyModal from './components/CreateCompanyModal';
 import CreateJobModal from './components/CreateJobModal';
 import CreateMotorModal from './components/CreateMotorModal';
+import AuthScreen from './components/AuthScreen';
 
 type ActiveView = 'dashboard' | 'companies' | 'motors' | 'jobs' | 'invoices' | 'warranties' | 'reports';
 
@@ -70,6 +72,8 @@ function App() {
   const [showCreateCompanyModal, setShowCreateCompanyModal] = useState(false);
   const [showCreateJobModal, setShowCreateJobModal] = useState(false);
   const [showCreateMotorModal, setShowCreateMotorModal] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState<string>('');
   
   // State to hold form data between steps
   const [companyFormData, setCompanyFormData] = useState<CompanyFormData>({
@@ -91,6 +95,35 @@ function App() {
     description: '',
     priority: ''
   });
+
+  // Check for existing authentication on app load
+  useEffect(() => {
+    const savedAuth = localStorage.getItem('motortrack_auth');
+    if (savedAuth) {
+      try {
+        const authData = JSON.parse(savedAuth);
+        if (authData.isAuthenticated && authData.username) {
+          setIsAuthenticated(true);
+          setCurrentUser(authData.username);
+        }
+      } catch (err) {
+        // Invalid auth data, clear it
+        localStorage.removeItem('motortrack_auth');
+      }
+    }
+  }, []);
+
+  const handleLogin = (username: string) => {
+    setIsAuthenticated(true);
+    setCurrentUser(username);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('motortrack_auth');
+    setIsAuthenticated(false);
+    setCurrentUser('');
+    setActiveView('dashboard');
+  };
 
   const navigation = [
     { name: 'Dashboard', icon: LayoutDashboard, key: 'dashboard' as ActiveView },
@@ -165,6 +198,11 @@ function App() {
     });
     setShowCreateJobModal(false);
   };
+
+  // Show auth screen if not authenticated
+  if (!isAuthenticated) {
+    return <AuthScreen onLogin={handleLogin} />;
+  }
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -260,7 +298,8 @@ function App() {
                 onSystemSettings={() => console.log('System Settings')}
                 onSecurity={() => console.log('Security')}
                 onHelp={() => console.log('Help & Support')}
-                onSignOut={() => console.log('Sign Out')}
+                onSignOut={handleLogout}
+                currentUser={currentUser}
               />
             </div>
           </div>

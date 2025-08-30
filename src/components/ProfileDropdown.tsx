@@ -7,6 +7,7 @@ interface ProfileDropdownProps {
   onSecurity: () => void;
   onHelp: () => void;
   onSignOut: () => void;
+  currentUser: string;
 }
 
 const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
@@ -14,7 +15,8 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
   onSystemSettings,
   onSecurity,
   onHelp,
-  onSignOut
+  onSignOut,
+  currentUser
 }) => {
   const [isOpen, setIsOpen] = useState(false)
 
@@ -57,8 +59,8 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
           <User className="h-4 w-4 text-gray-600" />
         </div>
         <div className="text-right hidden sm:block">
-          <p className="text-sm font-medium text-gray-900">Workshop Admin</p>
-          <p className="text-xs text-gray-500">admin@motortrackpro.com</p>
+          <p className="text-sm font-medium text-gray-900">{currentUser}</p>
+          <p className="text-xs text-gray-500">Workshop Admin</p>
         </div>
         <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
@@ -76,8 +78,8 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
                   <User className="h-5 w-5 text-gray-600" />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">Workshop Admin</p>
-                  <p className="text-sm text-gray-500">admin@motortrackpro.com</p>
+                  <p className="font-medium text-gray-900">{currentUser}</p>
+                  <p className="text-sm text-gray-500">Workshop Admin</p>
                 </div>
               </div>
             </div>
