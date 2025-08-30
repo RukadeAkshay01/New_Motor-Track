@@ -135,11 +135,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onCreateCompany, onCreateJob, onC
           </div>
           <div className="mt-4 sm:mt-0 flex space-x-2">
             <button 
-              onClick={onCreateCompany}
-              className="bg-white text-blue-600 px-4 py-2 rounded-lg font-medium hover:bg-blue-50 transition-colors flex items-center space-x-2"
+              onClick={onCreateJob}
+              className="bg-white text-blue-600 px-6 py-3 rounded-lg font-medium hover:bg-blue-50 transition-colors flex items-center space-x-2"
             >
               <Plus className="h-4 w-4" />
-              <span>Add Company</span>
+              <span>Create Job</span>
             </button>
           </div>
         </div>
@@ -175,34 +175,78 @@ const Dashboard: React.FC<DashboardProps> = ({ onCreateCompany, onCreateJob, onC
         <div className="lg:col-span-2 bg-white rounded-xl border border-gray-200">
           <div className="p-6 border-b border-gray-200">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-900">Recent Activity</h2>
+              <h2 className="text-xl font-bold text-gray-900">Company Activity Overview</h2>
               <button className="text-blue-600 hover:text-blue-700 font-medium text-sm">
-                View All Jobs
+                View All Companies
               </button>
             </div>
           </div>
           <div className="p-6">
             <div className="space-y-4">
-              {recentActivity.map((activity, index) => (
-                <div key={index} className="flex items-start space-x-4 p-4 hover:bg-gray-50 rounded-lg transition-colors">
-                  <div className={`p-2 rounded-lg ${getStatusColor(activity.status)}`}>
-                    {getStatusIcon(activity.status)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center space-x-2 mb-1">
-                      <p className="font-medium text-gray-900">{activity.id}</p>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(activity.status)}`}>
-                        {activity.status.replace('_', ' ')}
-                      </span>
+              {companies.slice(0, 5).map((company) => {
+                const companyJobs = jobs.filter(j => j.company_id === company.id);
+                const activeJobs = companyJobs.filter(j => ['pending', 'in_progress'].includes(j.status));
+                const completedJobs = companyJobs.filter(j => ['completed', 'delivered'].includes(j.status));
+                const totalEstimatedValue = activeJobs.reduce((sum, job) => sum + (job.estimated_cost || 0), 0);
+                const lastActivity = companyJobs.length > 0 
+                  ? new Date(Math.max(...companyJobs.map(j => new Date(j.updated_at).getTime())))
+                  : new Date(company.updated_at);
+                
+                return (
+                  <div key={company.id} className="flex items-start space-x-4 p-4 hover:bg-gray-50 rounded-lg transition-colors border border-gray-100">
+                    <div className="p-3 rounded-lg bg-blue-100">
+                      <Building2 className="h-5 w-5 text-blue-600" />
                     </div>
-                    <p className="text-sm text-gray-600">{activity.company}</p>
-                    <p className="text-sm text-gray-500 mt-1">{activity.description}</p>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-medium text-gray-900">{company.name}</h3>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(company.status)}`}>
+                          {company.status.replace('_', ' ')}
+                        </span>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
+                        <div className="text-center">
+                          <p className="text-xs text-gray-500">Active Jobs</p>
+                          <p className="font-semibold text-blue-600">{activeJobs.length}</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-xs text-gray-500">Total Motors</p>
+                          <p className="font-semibold text-gray-900">{company.motor_count}</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-xs text-gray-500">Completed</p>
+                          <p className="font-semibold text-green-600">{completedJobs.length}</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-xs text-gray-500">Est. Value</p>
+                          <p className="font-semibold text-green-600">${totalEstimatedValue.toLocaleString()}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm text-gray-600">Contact: {company.contact_name}</p>
+                        <p className="text-xs text-gray-500">
+                          Last activity: {lastActivity.toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-sm text-gray-400">
-                    {activity.date}
-                  </div>
+                );
+              })}
+              
+              {companies.length === 0 && (
+                <div className="text-center py-8">
+                  <Building2 className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                  <p className="text-gray-500">No companies yet</p>
+                  <button 
+                    onClick={onCreateCompany}
+                    className="mt-2 text-blue-600 hover:text-blue-700 font-medium text-sm"
+                  >
+                    Add your first company
+                  </button>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>
@@ -217,8 +261,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onCreateCompany, onCreateJob, onC
               onClick={onCreateJob}
               className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
             >
-              <Plus className="h-5 w-5" />
-              <span>Create New Job</span>
+              <Wrench className="h-5 w-5" />
+              <span>Create Job</span>
             </button>
             <button 
               onClick={onCreateCompany}
@@ -238,29 +282,76 @@ const Dashboard: React.FC<DashboardProps> = ({ onCreateCompany, onCreateJob, onC
             {/* Alerts Section */}
             <div className="mt-6 pt-6 border-t border-gray-200">
               <h3 className="font-medium text-gray-900 mb-4">Alerts & Reminders</h3>
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3 p-3 bg-orange-50 rounded-lg">
-                  <AlertCircle className="h-5 w-5 text-orange-600" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-orange-800">3 jobs due this week</p>
-                    <p className="text-xs text-orange-600">Review upcoming deadlines</p>
+              
+              {(() => {
+                const jobsDueThisWeek = jobs.filter(job => {
+                  const dueDate = new Date(job.due_date || '');
+                  const today = new Date();
+                  const weekFromNow = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+                  return dueDate >= today && dueDate <= weekFromNow && ['pending', 'in_progress'].includes(job.status);
+                }).length;
+
+                const overdueInvoices = invoices.filter(invoice => {
+                  const dueDate = new Date(invoice.due_date);
+                  const today = new Date();
+                  return dueDate < today && invoice.status !== 'paid';
+                }).length;
+
+                const warrantiesExpiringSoon = warranties.filter(warranty => {
+                  const endDate = new Date(warranty.warranty_end);
+                  const today = new Date();
+                  const thirtyDaysFromNow = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+                  return endDate >= today && endDate <= thirtyDaysFromNow && warranty.status === 'active';
+                }).length;
+
+                const hasAlerts = jobsDueThisWeek > 0 || overdueInvoices > 0 || warrantiesExpiringSoon > 0;
+
+                if (!hasAlerts) {
+                  return (
+                    <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg">
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-green-800">All caught up!</p>
+                        <p className="text-xs text-green-600">No urgent items require attention</p>
+                      </div>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="space-y-3">
+                    {jobsDueThisWeek > 0 && (
+                      <div className="flex items-center space-x-3 p-3 bg-orange-50 rounded-lg">
+                        <AlertCircle className="h-5 w-5 text-orange-600" />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-orange-800">{jobsDueThisWeek} jobs due this week</p>
+                          <p className="text-xs text-orange-600">Review upcoming deadlines</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {overdueInvoices > 0 && (
+                      <div className="flex items-center space-x-3 p-3 bg-red-50 rounded-lg">
+                        <AlertCircle className="h-5 w-5 text-red-600" />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-red-800">{overdueInvoices} invoices overdue</p>
+                          <p className="text-xs text-red-600">Follow up on payments</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {warrantiesExpiringSoon > 0 && (
+                      <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">
+                        <CheckCircle className="h-5 w-5 text-blue-600" />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-blue-800">{warrantiesExpiringSoon} warranties expiring soon</p>
+                          <p className="text-xs text-blue-600">Consider renewals</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
-                <div className="flex items-center space-x-3 p-3 bg-red-50 rounded-lg">
-                  <AlertCircle className="h-5 w-5 text-red-600" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-red-800">2 invoices overdue</p>
-                    <p className="text-xs text-red-600">Follow up on payments</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">
-                  <CheckCircle className="h-5 w-5 text-blue-600" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-blue-800">5 warranties expiring soon</p>
-                    <p className="text-xs text-blue-600">Consider renewals</p>
-                  </div>
-                </div>
-              </div>
+                );
+              })()}
             </div>
           </div>
         </div>
