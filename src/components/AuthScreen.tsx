@@ -190,8 +190,8 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
           {isLogin && (
             <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
               <p className="text-blue-800 text-sm font-medium mb-1">Demo Credentials:</p>
-              <p className="text-blue-700 text-sm">Username: <span className="font-mono">Akshay</span></p>
-              <p className="text-blue-700 text-sm">Password: <span className="font-mono">password</span></p>
+              <p className="text-blue-700 text-sm">Username: <span className="font-mono">Electrovia</span></p>
+              <p className="text-blue-700 text-sm">Password: <span className="font-mono">$dmin@123</span></p>
             </div>
           )}
 
